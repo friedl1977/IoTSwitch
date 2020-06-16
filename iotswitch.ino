@@ -134,10 +134,10 @@ boolean connectToCloud = true;
 
 
 
-//char auth[] = "7PFdxmuYCbrT_ZDUZxVXKxNGo1kcYg9v"; // Friedl
-//char auth[] = "8eKhkdqTBQnkyLOFwS9J8HRTpiTb8eS3";   // Pieter
-//char auth[] = "l5QlUVy1J_xP4pUbtG1khW5cSd6J7r1S";     // Doubell2
-char auth[] = "jOgHLb712l_tuMGCTEDh5DP1c-MB4FTF";  // Doubell1
+//char auth[] = "CODE 1"; // Dashboard 1
+//char auth[] = "CODE 2";   // Dashboard 2
+//char auth[] = "CODE 3";     // Dashboard 3
+char auth[] = "CODE 4";  // Dashboard 4
 
 // Establish Ubidots Webhook
 const char* WEBHOOK_NAME = "Amp";       
@@ -184,7 +184,6 @@ BLYNK_WRITE(V7)
 } 
 
 //FINAL TIMER IDEA - START//
-
 BLYNK_WRITE(V10)                        // Holiday Mode Timer Widget Enable Button
 {                                       
     widgetTimerEnable = param.asInt();
@@ -230,7 +229,6 @@ if (powersaving == 1 && widgetTimerEnable == 1 && hibernate == 0) {         // D
  
     }
 }
-
 //FINAL TIMER IDEA - END/
 
 
@@ -247,9 +245,9 @@ void setup() {
     WiFi.on();
     WiFi.connect();
     
-//    pinMode(A2, INPUT);      //Interrupt pin - 4k7 series resistor  CURRENTLY RESULTS IN HARD FAULT
-    pinMode(A3, INPUT);      //Input pin - 4k7 series resistor
-    pinMode(A5, INPUT);      //Input pin - ACS722
+//    pinMode(A2, INPUT);        //Interrupt pin - 4k7 series resistor  CURRENTLY RESULTS IN HARD FAULT
+    pinMode(A3, INPUT);        //Input pin - 4k7 series resistor
+    pinMode(A5, INPUT);        //Input pin - ACS722
     
 //    attachInterrupt(A2, Listen_Mode, FALLING);  // Interrupt pin - 4k7 series resistor  CURRENTLY RESULTS IN HARD FAULT
 
@@ -263,7 +261,6 @@ void setup() {
     pinMode(redPin, OUTPUT);
     pinMode(bluePin, OUTPUT);
     pinMode(greenPin, OUTPUT);
-
 }
 
 void pins_init()
@@ -331,10 +328,8 @@ void temperature() {
 
     Serial.print(Celsius);
     Serial.println(" *C ");
-    Blynk.virtualWrite(V2, Celsius);
-    
+    Blynk.virtualWrite(V2, Celsius);   
 }
-
 
 void CS() {
 
