@@ -13,6 +13,38 @@
 
 //  Firmware:       V1.0.0
 
+/////////// DYNAMIC AUTH TOKEN START -- to be modified and completed /////////// 
+
+// class IPAndName {
+
+// public:
+//     AUTH address;
+//     std::string name;
+//     AuthAndID(std::string auth, std::string id);
+// };
+
+// AuthAndID::AuthAndID(std::string auth, string id) : address(a, b, c, d) {
+//     name = n;
+// }
+
+// AuthAndID addresses[] = {               //  IP Address list
+//     AuthAndID(191, "Router"),
+//     AuthAndID(192, "Extender"),
+//     AuthAndID(193, "iPhone"),
+//     AuthAndID(194, "Macbook"),
+    
+// };
+
+// int number_of_addresses = 4;            //  Specify number of allowed IP's. Should match list.
+
+// int numberOfReceivedPackage;
+// unsigned long lastTime = 0;                      
+
+// int status;                             //  Define string
+
+/////////// DYNAMIC AUTH TOKEN END -- to be modified and completed  /////////// 
+
+
 #include <Adafruit_Sensor.h>                 //  Temperature
 #include <blynk.h> 
 #include <spark-dallas-temperature.h>        //  Temperature
@@ -99,41 +131,7 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
 //////////////////////////////// ------------- SOFT AP END ------------------////////////////////////////////////
 
 boolean connectToCloud = true;
-//boolean Listen_ModeFlag = false;   
-
 volatile int Listen_ModeFlag = false;
-
-/////////// DYNAMIC AUTH TOKEN START -- to be modified and completed /////////// 
-
-// class IPAndName {
-
-// public:
-//     AUTH address;
-//     std::string name;
-//     AuthAndID(std::string auth, std::string id);
-// };
-
-// AuthAndID::AuthAndID(std::string auth, string id) : address(a, b, c, d) {
-//     name = n;
-// }
-
-// AuthAndID addresses[] = {               //  IP Address list
-//     AuthAndID(191, "Router"),
-//     AuthAndID(192, "Extender"),
-//     AuthAndID(193, "iPhone"),
-//     AuthAndID(194, "Macbook"),
-    
-// };
-
-// int number_of_addresses = 4;            //  Specify number of allowed IP's. Should match list.
-
-// int numberOfReceivedPackage;
-// unsigned long lastTime = 0;                      
-
-// int status;                             //  Define string
-
-/////////// DYNAMIC AUTH TOKEN END -- to be modified and completed  /////////// 
-
 
 
 //char auth[] = "Friedl"; // Friedl
@@ -191,7 +189,7 @@ attachInterrupt(A2, Set_Listen_ModeFlag, FALLING);
     WiFi.setListenTimeout(10);
     sensors.begin();        //  Temperature   
     
-    Blynk.begin(auth);
+//    Blynk.begin(auth);
     
     pinMode(relay, OUTPUT);
     pinMode(redPin, OUTPUT);
@@ -365,11 +363,13 @@ void connect() {
         if(Particle.connected() == false) {  
              Particle.connect();
              connectToCloud = false; 
+             Blynk.begin(auth);
         }
     }
 }
 
 void BLYNK() {
+   
     if (!WiFi.ready()) {
         Blynk.run();
         
@@ -379,7 +379,6 @@ void BLYNK() {
 
 void loop() {
     
-//    Blynk.run();
     BLYNK();    
     CS();
     temperature();
