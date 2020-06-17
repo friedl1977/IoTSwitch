@@ -99,7 +99,9 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
 //////////////////////////////// ------------- SOFT AP END ------------------////////////////////////////////////
 
 boolean connectToCloud = true;
+//boolean Listen_ModeFlag = false;   
 
+volatile int Listen_ModeFlag = false;
 
 /////////// DYNAMIC AUTH TOKEN START -- to be modified and completed /////////// 
 
@@ -134,10 +136,10 @@ boolean connectToCloud = true;
 
 
 
-//char auth[] = "CODE 1"; // Dashboard 1
-//char auth[] = "CODE 2";   // Dashboard 2
-//char auth[] = "CODE 3";     // Dashboard 3
-char auth[] = "CODE 4";  // Dashboard 4
+//char auth[] = "Friedl"; // Friedl
+//char auth[] = "Pieter";   // Pieter
+//char auth[] = "Doubell1";     // Doubell1 
+char auth[] = "l5QlUVy1J_xP4pUbtG1khW5cSd6J7r1S";  // Doubell2
 
 // Establish Ubidots Webhook
 const char* WEBHOOK_NAME = "Amp";       
@@ -165,8 +167,37 @@ int hibernate;                          //Timer - ENABLE/DISABLE whole sistem
 
 int MasterPSU;                          //Timer - Master PSU in sync with Timer
 
-int Athree = analogRead(A3);
-int Atwo = analogRead(A2);
+float amplitude_current;     // Float amplitude current
+float effective_value;       // Float effective current
+float Celsius = 0;           // Temperature
+
+
+void setup() {
+    
+    Serial.begin(115200);
+    RGB.mirrorTo(D3, D1, D2);
+
+    WiFi.on();
+    WiFi.connect();
+    
+    pinMode(A2, INPUT);        //Interrupt pin - 4k7 series resistor  CURRENTLY RESULTS IN HARD FAULT
+    pinMode(A3, INPUT);        //Input pin - 4k7 series resistor
+    pinMode(A5, INPUT);        //Input pin - ACS722
+    
+//    attachInterrupt(A2, Listen_Mode, FALLING);  // Interrupt pin - 4k7 series resistor  CURRENTLY RESULTS IN HARD FAULT
+attachInterrupt(A2, Set_Listen_ModeFlag, FALLING);
+
+
+    WiFi.setListenTimeout(10);
+    sensors.begin();        //  Temperature   
+    
+    Blynk.begin(auth);
+    
+    pinMode(relay, OUTPUT);
+    pinMode(redPin, OUTPUT);
+    pinMode(bluePin, OUTPUT);
+    pinMode(greenPin, OUTPUT);
+}
 
 
 BLYNK_WRITE(V7)
@@ -230,38 +261,6 @@ if (powersaving == 1 && widgetTimerEnable == 1 && hibernate == 0) {         // D
     }
 }
 //FINAL TIMER IDEA - END/
-
-
-float amplitude_current;     // Float amplitude current
-float effective_value;       // Float effective current
-float Celsius = 0;           // Temperature
-
-
-void setup() {
-    
-    Serial.begin(115200);
-    RGB.mirrorTo(D3, D1, D2);
-
-    WiFi.on();
-    WiFi.connect();
-    
-//    pinMode(A2, INPUT);        //Interrupt pin - 4k7 series resistor  CURRENTLY RESULTS IN HARD FAULT
-    pinMode(A3, INPUT);        //Input pin - 4k7 series resistor
-    pinMode(A5, INPUT);        //Input pin - ACS722
-    
-//    attachInterrupt(A2, Listen_Mode, FALLING);  // Interrupt pin - 4k7 series resistor  CURRENTLY RESULTS IN HARD FAULT
-
-    WiFi.setListenTimeout(300);
-    
-    sensors.begin();        //  Temperature   
-    Blynk.begin(auth);
-    
-    pinMode(relay, OUTPUT);
-    
-    pinMode(redPin, OUTPUT);
-    pinMode(bluePin, OUTPUT);
-    pinMode(greenPin, OUTPUT);
-}
 
 void pins_init()
 {
@@ -335,6 +334,9 @@ void CS() {
 
     float sensor_value = getRms();
     float kWh = (sensor_value * 235)/1000;
+    
+    int Athree = analogRead(A3);
+//    int Atwo = analogRead(A2);
  
   if (sensor_value >= 0) {
 
@@ -343,14 +345,15 @@ void CS() {
  
      Particle.publish("Amp", String::format("{\"data\":%.3f}", sensor_value), PRIVATE); 
      Particle.publish("kWh", String::format("{\"data\":%.3f}", kWh), PRIVATE); 
+     
      Particle.publish("A-three", String(Athree), PRIVATE);      // debug
-     Particle.publish("A-two", String(Atwo), PRIVATE);          // debug
+//     Particle.publish("A-two", String(Atwo), PRIVATE);          // debug
      
         Blynk.virtualWrite(V5, sensor_value);
         Blynk.virtualWrite(V4, kWh);
 
      
-     for(uint32_t ms = millis(); millis() - ms < 5000; Particle.process());
+     for(uint32_t ms = millis(); millis() - ms < 1000; Particle.process());
     
     } else {
      
@@ -366,15 +369,32 @@ void connect() {
     }
 }
 
+void BLYNK() {
+    if (!WiFi.ready()) {
+        Blynk.run();
+        
+        }else {
+    }
+}
+
 void loop() {
     
-    Blynk.run();
+//    Blynk.run();
+    BLYNK();    
     CS();
     temperature();
     connect();
+    Listen_Mode();
 }
 
-void Listen_Mode() {        //  Enter Listem mode when interupt is called
-     WiFi.listen();
-}
     
+void Set_Listen_ModeFlag() {        
+     Listen_ModeFlag = true;
+}
+
+void Listen_Mode() {                //  Enter Listem mode when interupt is called
+        if (Listen_ModeFlag == true) {
+            Listen_ModeFlag = false;
+            WiFi.listen();     
+    }
+}
